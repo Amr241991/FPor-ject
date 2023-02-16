@@ -1,5 +1,6 @@
 var models =require("../models");
 var bcrypt = require('bcryptjs');
+var authService =require("../service/authService")
 
 
 var store = async function (req, res, next) {
@@ -32,6 +33,7 @@ var store = async function (req, res, next) {
         res.send(result)
         return
     }
+    password = authService.hashPassword(password)
     var [user, created] = await models.User.findOrCreate({
         where: {
             email: email
