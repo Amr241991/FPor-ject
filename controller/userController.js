@@ -9,14 +9,14 @@ var store = async function (req, res, next) {
         messages: [],
         data: {}
     }
-    function cryptPassword(plainTextPassword) {
-        var salt = bcrypt.genSaltSync(10);
-        var hash = bcrypt.hashSync(plainTextPassword, salt);
-        return hash
-    }
+    // function cryptPassword(plainTextPassword) {
+    //     var salt = bcrypt.genSaltSync(10);
+    //     var hash = bcrypt.hashSync(plainTextPassword, salt);
+    //     return hash
+    // }
     var username = req.body.username.trim()
     var email = req.body.email.trim()
-    var password = cryptPassword(req.body.password.trim())
+    var password = req.body.password.trim()
     if (username.length < 3) {
         result.success = false
         result.messages.push('Please check your name')
@@ -159,7 +159,8 @@ var login = async function (req, res, next) {
         data: {}
     }
     var email = req.body.email.trim()
-    var plainTextPassword = req.body.password.trim()
+    // var plainTextPassword = req.body.password.trim()
+    var password = req.body.password.trim()
     var loggedMember = await models.User.findOne({
         where: {
             email: email,
@@ -168,8 +169,8 @@ var login = async function (req, res, next) {
         if (!user) {
             return false
         } else {
-            let passwordMach = bcrypt.compareSync(plainTextPassword, user.password)
-            if (passwordMach) {
+            // let passwordMach = bcrypt.compareSync(plainTextPassword, user.password)
+            if (authService.comparePassword(password, user.password)) {
                 return user
             } else {
                 return false
@@ -177,7 +178,8 @@ var login = async function (req, res, next) {
         }
     })
     if (loggedMember) {
-        result.data = loggedMember.id
+        result.data = loggedMember,
+        result.token = authService.generateToken(loggedMember.id, 'user')
         result.messages.push("sign in successfully.")
     } else {
         result.success = false
